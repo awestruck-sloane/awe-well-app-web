@@ -226,4 +226,11 @@
     if (res.data && res.data.session) checkGate();
     else show('view-signedout');
   });
+  // The loading screen must never strand anyone: if the session check hasn't
+  // answered in 4s (wedged storage lock, misbehaving extension), fall through
+  // to the sign-in screen. Worst case a signed-in person clicks the button
+  // and lands right back in their session.
+  setTimeout(function () {
+    if (!$('view-loading').hidden) show('view-signedout');
+  }, 4000);
 })();
