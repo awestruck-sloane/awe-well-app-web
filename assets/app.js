@@ -217,20 +217,31 @@
   }
 
   // ---------- boot ----------
+  // The fallback arms FIRST, before anything that can throw: the loading
+  // screen must never strand anyone. If the session check hasn't answered in
+  // 4s (wedged storage lock, storage-blocking extension, anything), fall
+  // through to the sign-in screen. Worst case a signed-in person clicks the
+  // button and lands right back in their session.
   loading();
-  client.auth.onAuthStateChange(function (_event, session) {
-    if (session) checkGate();
-    else show('view-signedout');
-  });
-  client.auth.getSession().then(function (res) {
-    if (res.data && res.data.session) checkGate();
-    else show('view-signedout');
-  });
-  // The loading screen must never strand anyone: if the session check hasn't
-  // answered in 4s (wedged storage lock, misbehaving extension), fall through
-  // to the sign-in screen. Worst case a signed-in person clicks the button
-  // and lands right back in their session.
   setTimeout(function () {
     if (!$('view-loading').hidden) show('view-signedout');
   }, 4000);
+  try {
+    client.auth.onAuthStateChange(function (_event, session) {
+      if (session) checkGate();
+      else show('view-signedout');
+    });
+    client.auth.getSession().then(function (res) {
+      if (res.data && res.data.session) checkGate();
+      else show('view-signedout');
+    }, function () {
+      show('view-signedout');
+    });
+  } catch (e) {
+    show('view-signedout');
+    showSignInError(
+      'This browser blocked part of the page (often a privacy extension). ' +
+      'Sign-in may not work until it is allowed. (' + (e && e.message) + ')',
+    );
+  }
 })();
