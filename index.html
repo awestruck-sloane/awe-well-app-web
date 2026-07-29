@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src https://flhnxekpcvebjzhjvlsu.supabase.co; base-uri 'none'; form-action 'none'" />
+  <meta name="robots" content="noindex" />
+  <title>Awe Well · Journal</title>
+  <link rel="stylesheet" href="./assets/app.css" />
+</head>
+<body>
+
+  <!-- Restoring your session -->
+  <section id="view-loading" class="center" hidden>
+    <div class="spark">✦</div>
+    <p class="quiet" id="loading-msg">One moment</p>
+  </section>
+
+  <!-- Signed out -->
+  <section id="view-signedout" class="center" hidden>
+    <div class="wordmark">Awe Well</div>
+    <h1>Your journal, on any computer</h1>
+    <p class="quiet lede">Everything you noticed in the app, here to re-read
+      and search. Sign in with the same Apple ID you use in Awe Well.</p>
+    <button id="btn-signin" class="cta">Continue with Apple</button>
+    <p class="quiet fine" id="signin-error" hidden></p>
+    <p class="quiet fine"><a href="https://awe-well.com/privacy.html">Privacy policy</a></p>
+  </section>
+
+  <!-- Signed in, no active subscription (or check unavailable) -->
+  <section id="view-gate" class="center" hidden>
+    <div class="wordmark">Awe Well</div>
+    <h1 id="gate-title">You're signed in</h1>
+    <p class="quiet lede" id="gate-msg">The journal on the web comes with the
+      Awe Well subscription, which lives in the app. Your words are safe and
+      waiting.</p>
+    <button id="btn-retry" class="cta ghost" hidden>Try again</button>
+    <p class="quiet fine"><button id="btn-signout-gate" class="linkish">Sign out</button></p>
+  </section>
+
+  <!-- The reading room -->
+  <section id="view-journal" hidden>
+    <header class="bar">
+      <span class="wordmark small">Awe Well</span>
+      <span class="bar-title">Journal</span>
+      <button id="btn-signout" class="linkish">Sign out</button>
+    </header>
+    <div class="room">
+      <aside class="list" id="list-pane">
+        <input id="search" type="search" placeholder="Search your reflections"
+               autocomplete="off" />
+        <div id="rows" role="list"></div>
+        <p class="quiet fine" id="list-empty" hidden></p>
+      </aside>
+      <main class="pane" id="read-pane">
+        <button id="btn-back" class="linkish back" hidden>‹ All reflections</button>
+        <div id="entry"></div>
+      </main>
+    </div>
+  </section>
+
+  <script src="./assets/supabase.js"></script>
+  <script src="./assets/related.js"></script>
+  <script src="./assets/app.js"></script>
+</body>
+</html>
