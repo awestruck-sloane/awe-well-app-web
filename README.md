@@ -22,3 +22,5 @@ Operational chore: the Apple Sign in with Apple WEB client secret (pasted in
 Supabase → Auth → Providers → Apple) expires every ~6 months and must be
 regenerated from the .p8 key. When it lapses, web sign-in breaks with an
 invalid_client error while the iOS app keeps working.
+
+<!-- purge wave 2 -->
