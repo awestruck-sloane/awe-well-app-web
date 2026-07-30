@@ -39,6 +39,13 @@ body {
   margin-bottom: 18px;
 }
 .wordmark.small { font-size: 19px; margin: 0; }
+.logo {
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+  margin-bottom: 10px;
+  box-shadow: 0 6px 18px rgba(43, 36, 64, 0.14);
+}
 
 /* ---- centered states (loading / signed out / gate) ---- */
 .center {

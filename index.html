@@ -7,7 +7,7 @@
         content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src https://flhnxekpcvebjzhjvlsu.supabase.co; base-uri 'none'; form-action 'none'" />
   <meta name="robots" content="noindex" />
   <title>Awe Well · Journal</title>
-  <link rel="stylesheet" href="./assets/app.css?v=6" />
+  <link rel="stylesheet" href="./assets/app.css?v=7" />
 </head>
 <body>
 
@@ -15,13 +15,11 @@
   <section id="view-loading" class="center" hidden>
     <div class="spark">✦</div>
     <p class="quiet" id="loading-msg">One moment</p>
-    <p class="quiet fine" id="diag"></p>
-    <p class="quiet fine" id="diag2"></p>
   </section>
 
   <!-- Signed out -->
   <section id="view-signedout" class="center" hidden>
-    <div class="wordmark">Awe Well</div>
+    <img class="logo" src="./assets/icon-512.png" alt="Awe Well" width="96" height="96" />
     <h1>Your journal, on any computer</h1>
     <p class="quiet lede">Everything you noticed in the app, here to re-read
       and search. Sign in with the same Apple ID you use in Awe Well.</p>
@@ -32,7 +30,7 @@
 
   <!-- Signed in, no active subscription (or check unavailable) -->
   <section id="view-gate" class="center" hidden>
-    <div class="wordmark">Awe Well</div>
+    <img class="logo" src="./assets/icon-512.png" alt="Awe Well" width="96" height="96" />
     <h1 id="gate-title">You're signed in</h1>
     <p class="quiet lede" id="gate-msg">The journal on the web comes with the
       Awe Well subscription, which lives in the app. Your words are safe and
@@ -62,8 +60,8 @@
     </div>
   </section>
 
-  <script src="./assets/supabase.js?v=6"></script>
-  <script src="./assets/related.js?v=6"></script>
-  <script src="./assets/app.js?v=6"></script>
+  <script src="./assets/supabase.js?v=7"></script>
+  <script src="./assets/related.js?v=7"></script>
+  <script src="./assets/app.js?v=7"></script>
 </body>
 </html>

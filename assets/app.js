@@ -193,56 +193,18 @@
   }
 
   // ---------- boot ----------
-  // Self-diagnosing: the build tag and every milestone print onto the
-  // loading screen itself, so a stuck screen names its own cause without
-  // DevTools. The 4s fallback arms before anything that can throw.
-  var BUILD = 'v5';
-  function diag(msg) {
-    var d = $('diag');
-    if (d) d.textContent = BUILD + ' · ' + msg;
-  }
-
+  // The 4s fallback arms before anything that can throw: the loading screen
+  // must never strand anyone. If the session check hasn't answered by then,
+  // fall through to sign-in; a signed-in person just lands back in their
+  // session when they click the button.
   loading();
-  diag('starting');
-
-  // Environment probes, printed on screen: heartbeat proves timers run;
-  // storage probe proves the auth library's backing store works; visibility
-  // catches throttling. All diagnostic-only.
-  var beats = 0;
-  var probes = [];
-  try {
-    localStorage.setItem('awe.probe', '1');
-    localStorage.removeItem('awe.probe');
-    probes.push('storage ok');
-  } catch (e) {
-    probes.push('storage BLOCKED: ' + (e && e.message));
-  }
-  probes.push('vis=' + document.visibilityState);
-  function beat() {
-    var d = $('diag2');
-    if (d) d.textContent = probes.join(' · ') + ' · t+' + beats + 's';
-  }
-  beat();
-  setInterval(function () { beats++; beat(); }, 1000);
   setTimeout(function () {
-    if (!$('view-loading').hidden) {
-      diag('fallback fired');
-      show('view-signedout');
-    }
+    if (!$('view-loading').hidden) show('view-signedout');
   }, 4000);
-  window.addEventListener('error', function (e) {
-    diag('error: ' + ((e && e.message) || 'unknown'));
-  });
-  window.addEventListener('unhandledrejection', function (e) {
-    var m = e && e.reason && e.reason.message ? e.reason.message : 'unknown';
-    diag('rejection: ' + m);
-  });
 
   try {
     client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    diag('client ready');
   } catch (e) {
-    diag('client failed: ' + (e && e.message));
     show('view-signedout');
     showSignInError(
       'This browser blocked part of the page (often a privacy extension). ' +
@@ -270,7 +232,7 @@
       showSignInError(params.get('error_description'));
     }
   } catch (e) {
-    diag('wiring failed: ' + (e && e.message));
+    // Wiring failure leaves the page readable; sign-in may be degraded.
   }
 
   // Show the back link only on narrow screens (CSS swaps panes there).
@@ -280,22 +242,17 @@
 
   if (client) {
     try {
-      client.auth.onAuthStateChange(function (event, session) {
-        diag('auth event: ' + event);
+      client.auth.onAuthStateChange(function (_event, session) {
         if (session) checkGate();
         else show('view-signedout');
       });
       client.auth.getSession().then(function (res) {
-        diag('session answered');
         if (res.data && res.data.session) checkGate();
         else show('view-signedout');
-      }, function (e) {
-        diag('session error: ' + (e && e.message));
+      }, function () {
         show('view-signedout');
       });
-      diag('waiting for session');
     } catch (e) {
-      diag('auth failed: ' + (e && e.message));
       show('view-signedout');
     }
   }
