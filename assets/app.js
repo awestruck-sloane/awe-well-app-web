@@ -196,7 +196,7 @@
   // Self-diagnosing: the build tag and every milestone print onto the
   // loading screen itself, so a stuck screen names its own cause without
   // DevTools. The 4s fallback arms before anything that can throw.
-  var BUILD = 'v4';
+  var BUILD = 'v5';
   function diag(msg) {
     var d = $('diag');
     if (d) d.textContent = BUILD + ' · ' + msg;
@@ -204,6 +204,26 @@
 
   loading();
   diag('starting');
+
+  // Environment probes, printed on screen: heartbeat proves timers run;
+  // storage probe proves the auth library's backing store works; visibility
+  // catches throttling. All diagnostic-only.
+  var beats = 0;
+  var probes = [];
+  try {
+    localStorage.setItem('awe.probe', '1');
+    localStorage.removeItem('awe.probe');
+    probes.push('storage ok');
+  } catch (e) {
+    probes.push('storage BLOCKED: ' + (e && e.message));
+  }
+  probes.push('vis=' + document.visibilityState);
+  function beat() {
+    var d = $('diag2');
+    if (d) d.textContent = probes.join(' · ') + ' · t+' + beats + 's';
+  }
+  beat();
+  setInterval(function () { beats++; beat(); }, 1000);
   setTimeout(function () {
     if (!$('view-loading').hidden) {
       diag('fallback fired');
@@ -260,14 +280,17 @@
 
   if (client) {
     try {
-      client.auth.onAuthStateChange(function (_event, session) {
+      client.auth.onAuthStateChange(function (event, session) {
+        diag('auth event: ' + event);
         if (session) checkGate();
         else show('view-signedout');
       });
       client.auth.getSession().then(function (res) {
+        diag('session answered');
         if (res.data && res.data.session) checkGate();
         else show('view-signedout');
-      }, function () {
+      }, function (e) {
+        diag('session error: ' + (e && e.message));
         show('view-signedout');
       });
       diag('waiting for session');
