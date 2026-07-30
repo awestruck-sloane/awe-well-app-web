@@ -11,7 +11,8 @@
   var SUPABASE_URL = 'https://flhnxekpcvebjzhjvlsu.supabase.co';
   var SUPABASE_ANON_KEY = 'sb_publishable_fkWD7iVtNQedsjHUSddfPw_h1WGUpyc';
 
-  var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // Created inside the guarded boot at the bottom; null until then.
+  var client = null;
 
   var entries = [];        // [{id, createdAt, prompt, body}]
   var selectedId = null;
@@ -191,57 +192,88 @@
     }
   }
 
-  // ---------- wiring ----------
-  $('btn-signin').addEventListener('click', signIn);
-  $('btn-signout').addEventListener('click', signOut);
-  $('btn-signout-gate').addEventListener('click', signOut);
-  $('btn-retry').addEventListener('click', checkGate);
-  $('search').addEventListener('input', function (e) {
-    query = e.target.value;
-    renderList();
-  });
-  $('btn-back').addEventListener('click', function () {
-    document.querySelector('.room').classList.remove('reading');
-  });
-  // Show the back link only on narrow screens (CSS swaps panes there).
-  function fitBack() {
-    $('btn-back').hidden = window.innerWidth > 820;
-  }
-  window.addEventListener('resize', fitBack);
-  fitBack();
-
-  // Surface an OAuth error bounced back in the URL, if any.
-  var params = new URLSearchParams(window.location.search);
-  if (params.get('error_description')) {
-    showSignInError(params.get('error_description'));
-  }
-
   // ---------- boot ----------
-  // The fallback arms FIRST, before anything that can throw: the loading
-  // screen must never strand anyone. If the session check hasn't answered in
-  // 4s (wedged storage lock, storage-blocking extension, anything), fall
-  // through to the sign-in screen. Worst case a signed-in person clicks the
-  // button and lands right back in their session.
+  // Self-diagnosing: the build tag and every milestone print onto the
+  // loading screen itself, so a stuck screen names its own cause without
+  // DevTools. The 4s fallback arms before anything that can throw.
+  var BUILD = 'v4';
+  function diag(msg) {
+    var d = $('diag');
+    if (d) d.textContent = BUILD + ' · ' + msg;
+  }
+
   loading();
+  diag('starting');
   setTimeout(function () {
-    if (!$('view-loading').hidden) show('view-signedout');
-  }, 4000);
-  try {
-    client.auth.onAuthStateChange(function (_event, session) {
-      if (session) checkGate();
-      else show('view-signedout');
-    });
-    client.auth.getSession().then(function (res) {
-      if (res.data && res.data.session) checkGate();
-      else show('view-signedout');
-    }, function () {
+    if (!$('view-loading').hidden) {
+      diag('fallback fired');
       show('view-signedout');
-    });
+    }
+  }, 4000);
+  window.addEventListener('error', function (e) {
+    diag('error: ' + ((e && e.message) || 'unknown'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    var m = e && e.reason && e.reason.message ? e.reason.message : 'unknown';
+    diag('rejection: ' + m);
+  });
+
+  try {
+    client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    diag('client ready');
   } catch (e) {
+    diag('client failed: ' + (e && e.message));
     show('view-signedout');
     showSignInError(
       'This browser blocked part of the page (often a privacy extension). ' +
       'Sign-in may not work until it is allowed. (' + (e && e.message) + ')',
     );
+  }
+
+  try {
+    $('btn-signin').addEventListener('click', signIn);
+    $('btn-signout').addEventListener('click', signOut);
+    $('btn-signout-gate').addEventListener('click', signOut);
+    $('btn-retry').addEventListener('click', checkGate);
+    $('search').addEventListener('input', function (e) {
+      query = e.target.value;
+      renderList();
+    });
+    $('btn-back').addEventListener('click', function () {
+      document.querySelector('.room').classList.remove('reading');
+    });
+    window.addEventListener('resize', fitBack);
+    fitBack();
+    // Surface an OAuth error bounced back in the URL, if any.
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('error_description')) {
+      showSignInError(params.get('error_description'));
+    }
+  } catch (e) {
+    diag('wiring failed: ' + (e && e.message));
+  }
+
+  // Show the back link only on narrow screens (CSS swaps panes there).
+  function fitBack() {
+    $('btn-back').hidden = window.innerWidth > 820;
+  }
+
+  if (client) {
+    try {
+      client.auth.onAuthStateChange(function (_event, session) {
+        if (session) checkGate();
+        else show('view-signedout');
+      });
+      client.auth.getSession().then(function (res) {
+        if (res.data && res.data.session) checkGate();
+        else show('view-signedout');
+      }, function () {
+        show('view-signedout');
+      });
+      diag('waiting for session');
+    } catch (e) {
+      diag('auth failed: ' + (e && e.message));
+      show('view-signedout');
+    }
   }
 })();
