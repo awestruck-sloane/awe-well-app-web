@@ -21,6 +21,10 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
+/* The hidden attribute must always win, including over display:flex on
+   the view sections. Without this, every view renders stacked and the app
+   looks eternally stuck on the first one. */
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body {
   background: var(--bg);
