@@ -7,7 +7,7 @@
         content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src https://flhnxekpcvebjzhjvlsu.supabase.co; base-uri 'none'; form-action 'none'" />
   <meta name="robots" content="noindex" />
   <title>Awe Well · Journal</title>
-  <link rel="stylesheet" href="./assets/app.css?v=8" />
+  <link rel="stylesheet" href="./assets/app.css?v=9" />
 </head>
 <body>
 
@@ -56,6 +56,7 @@
     <header class="bar">
       <span class="wordmark small">Awe Well</span>
       <span class="bar-title">Journal</span>
+      <button id="btn-write" class="barbtn">Write</button>
       <button id="btn-signout" class="linkish">Sign out</button>
     </header>
     <div class="room">
@@ -72,8 +73,38 @@
     </div>
   </section>
 
-  <script src="./assets/supabase.js?v=8"></script>
-  <script src="./assets/related.js?v=8"></script>
-  <script src="./assets/app.js?v=8"></script>
+  <!-- The writing room -->
+  <section id="view-compose" hidden>
+    <header class="bar">
+      <span class="wordmark small">Awe Well</span>
+      <span class="bar-title">Writing room</span>
+      <button id="btn-compose-back" class="linkish">Back to journal</button>
+    </header>
+    <div class="compose-scroll">
+      <div class="compose-inner">
+        <div id="compose-doors">
+          <h1 class="compose-title">Where would you like to start?</h1>
+          <div id="door-saved-head" class="door-head-label" hidden>From your saved invitations</div>
+          <div id="door-saved-list"></div>
+          <button id="door-open" class="door">
+            <span class="door-top">An open page</span>
+            <span class="door-sub">Nothing waiting on it but you.</span>
+          </button>
+        </div>
+        <div id="compose-editor" hidden>
+          <div id="compose-context"></div>
+          <textarea id="compose-body" placeholder="What did you notice?"></textarea>
+          <div class="compose-actions">
+            <button id="btn-save-reflection" class="cta">Save reflection</button>
+            <span class="quiet fine" id="compose-hint"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="./assets/supabase.js?v=9"></script>
+  <script src="./assets/related.js?v=9"></script>
+  <script src="./assets/app.js?v=9"></script>
 </body>
 </html>

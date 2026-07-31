@@ -26,7 +26,7 @@
     if (text !== undefined) n.textContent = text;
     return n;
   }
-  var VIEWS = ['view-loading', 'view-signedout', 'view-gate', 'view-journal'];
+  var VIEWS = ['view-loading', 'view-signedout', 'view-gate', 'view-journal', 'view-compose'];
   function show(id) {
     VIEWS.forEach(function (v) { $(v).hidden = v !== id; });
   }
@@ -190,6 +190,123 @@
       });
       box.appendChild(s);
     }
+
+    var wf = el('p', 'writefrom');
+    var wfb = el('button', 'linkish', 'Write from this');
+    wfb.addEventListener('click', function () {
+      startEditor({ kind: 'entry', r: r });
+    });
+    wf.appendChild(wfb);
+    box.appendChild(wf);
+  }
+
+  // ---------- writing room ----------
+  // Three doors, all landing in the same editor: a saved invitation from
+  // the bank (retired on save, same as the app), a past entry to write
+  // from (the deepening move), or an open page.
+  var composeFrom = null;
+  var composeDirty = false;
+
+  function openCompose() {
+    composeFrom = null;
+    composeDirty = false;
+    $('compose-body').value = '';
+    $('compose-editor').hidden = true;
+    $('compose-doors').hidden = false;
+    show('view-compose');
+    client
+      .from('saved_prompts')
+      .select('id, text, source')
+      .order('saved_at', { ascending: false })
+      .then(function (res) {
+        var list = $('door-saved-list');
+        list.textContent = '';
+        var rows = res.data || [];
+        $('door-saved-head').hidden = rows.length === 0;
+        rows.forEach(function (sp) {
+          var d = el('button', 'door');
+          d.appendChild(el('span', 'door-top', sp.text));
+          d.appendChild(el('span', 'door-sub', sp.source || 'saved for later'));
+          d.addEventListener('click', function () {
+            startEditor({ kind: 'saved', sp: sp });
+          });
+          list.appendChild(d);
+        });
+      });
+  }
+
+  function startEditor(from) {
+    composeFrom = from;
+    var ctx = $('compose-context');
+    ctx.textContent = '';
+    if (from.kind === 'saved') {
+      var pb = el('div', 'promptbox');
+      pb.appendChild(el('span', 'sp', '✦'));
+      pb.appendChild(el('p', null, from.sp.text));
+      ctx.appendChild(pb);
+    } else if (from.kind === 'entry') {
+      ctx.appendChild(el('div', 'edate', formatDate(from.r.createdAt)));
+      if (from.r.prompt) {
+        var pb2 = el('div', 'promptbox');
+        pb2.appendChild(el('span', 'sp', '✦'));
+        pb2.appendChild(el('p', null, from.r.prompt));
+        ctx.appendChild(pb2);
+      }
+      var o = el('div', 'origin-entry');
+      o.appendChild(el('div', 'origin-body', from.r.body));
+      ctx.appendChild(o);
+    }
+    $('compose-doors').hidden = true;
+    $('compose-editor').hidden = false;
+    $('compose-hint').textContent = '⌘↩ saves';
+    show('view-compose');
+    setTimeout(function () { $('compose-body').focus(); }, 50);
+  }
+
+  function leaveCompose() {
+    if (composeDirty && $('compose-body').value.trim()) {
+      if (!window.confirm('Discard this reflection? It has not been saved.')) {
+        return;
+      }
+    }
+    composeDirty = false;
+    $('compose-body').value = '';
+    show('view-journal');
+  }
+
+  function saveReflection() {
+    var body = $('compose-body').value.trim();
+    if (!body) return;
+    var prompt = '';
+    if (composeFrom && composeFrom.kind === 'saved') prompt = composeFrom.sp.text;
+    if (composeFrom && composeFrom.kind === 'entry') prompt = composeFrom.r.prompt || '';
+    $('btn-save-reflection').disabled = true;
+    client
+      .from('reflections')
+      .insert({ prompt: prompt, body: body })
+      .select('id, prompt, body, created_at')
+      .single()
+      .then(function (res) {
+        $('btn-save-reflection').disabled = false;
+        if (res.error) {
+          $('compose-hint').textContent = 'Could not save: ' + res.error.message;
+          return;
+        }
+        composeDirty = false;
+        $('compose-body').value = '';
+        // Written from a saved invitation -> it retires from the bank,
+        // exactly as the app does.
+        if (composeFrom && composeFrom.kind === 'saved') {
+          client.from('saved_prompts').delete().eq('id', composeFrom.sp.id)
+            .then(function () {});
+        }
+        var r = res.data;
+        entries.unshift({ id: r.id, createdAt: r.created_at, prompt: r.prompt, body: r.body });
+        selectedId = r.id;
+        renderList();
+        renderEntry();
+        show('view-journal');
+      });
   }
 
   // ---------- boot ----------
@@ -223,6 +340,24 @@
     });
     $('btn-back').addEventListener('click', function () {
       document.querySelector('.room').classList.remove('reading');
+    });
+    $('btn-write').addEventListener('click', openCompose);
+    $('btn-compose-back').addEventListener('click', leaveCompose);
+    $('door-open').addEventListener('click', function () {
+      startEditor({ kind: 'open' });
+    });
+    $('btn-save-reflection').addEventListener('click', saveReflection);
+    $('compose-body').addEventListener('input', function () {
+      composeDirty = true;
+    });
+    $('compose-body').addEventListener('keydown', function (e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') saveReflection();
+    });
+    window.addEventListener('beforeunload', function (e) {
+      if (!$('view-compose').hidden && composeDirty && $('compose-body').value.trim()) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
     });
     window.addEventListener('resize', fitBack);
     fitBack();
