@@ -7,7 +7,7 @@
         content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src https://flhnxekpcvebjzhjvlsu.supabase.co; base-uri 'none'; form-action 'none'" />
   <meta name="robots" content="noindex" />
   <title>Awe Well · Journal</title>
-  <link rel="stylesheet" href="./assets/app.css?v=7" />
+  <link rel="stylesheet" href="./assets/app.css?v=8" />
 </head>
 <body>
 
@@ -19,6 +19,14 @@
 
   <!-- Signed out -->
   <section id="view-signedout" class="center" hidden>
+    <span class="star" style="left:8%;  top:12%; width:4px; height:4px; opacity:.9;"></span>
+    <span class="star" style="left:22%; top:26%; width:3px; height:3px; opacity:.55;"></span>
+    <span class="star" style="left:15%; top:64%; width:2px; height:2px; opacity:.4;"></span>
+    <span class="star" style="left:78%; top:14%; width:4px; height:4px; opacity:.85;"></span>
+    <span class="star" style="left:88%; top:38%; width:2px; height:2px; opacity:.5;"></span>
+    <span class="star" style="left:67%; top:8%;  width:3px; height:3px; opacity:.65;"></span>
+    <span class="star" style="left:36%; top:9%;  width:2px; height:2px; opacity:.6;"></span>
+    <span class="star" style="left:92%; top:70%; width:3px; height:3px; opacity:.35;"></span>
     <img class="logo" src="./assets/icon-512.png" alt="Awe Well" width="96" height="96" />
     <h1>Your journal, on any computer</h1>
     <p class="quiet lede">Everything you noticed in the app, here to re-read
@@ -30,6 +38,10 @@
 
   <!-- Signed in, no active subscription (or check unavailable) -->
   <section id="view-gate" class="center" hidden>
+    <span class="star" style="left:10%; top:16%; width:4px; height:4px; opacity:.85;"></span>
+    <span class="star" style="left:80%; top:12%; width:3px; height:3px; opacity:.7;"></span>
+    <span class="star" style="left:90%; top:44%; width:2px; height:2px; opacity:.45;"></span>
+    <span class="star" style="left:24%; top:70%; width:2px; height:2px; opacity:.4;"></span>
     <img class="logo" src="./assets/icon-512.png" alt="Awe Well" width="96" height="96" />
     <h1 id="gate-title">You're signed in</h1>
     <p class="quiet lede" id="gate-msg">The journal on the web comes with the
@@ -60,8 +72,8 @@
     </div>
   </section>
 
-  <script src="./assets/supabase.js?v=7"></script>
-  <script src="./assets/related.js?v=7"></script>
-  <script src="./assets/app.js?v=7"></script>
+  <script src="./assets/supabase.js?v=8"></script>
+  <script src="./assets/related.js?v=8"></script>
+  <script src="./assets/app.js?v=8"></script>
 </body>
 </html>

@@ -47,7 +47,9 @@ body {
   box-shadow: 0 6px 18px rgba(43, 36, 64, 0.14);
 }
 
-/* ---- centered states (loading / signed out / gate) ---- */
+/* ---- centered states (loading / signed out / gate) ----
+   The front door wears the app's twilight: indigo into sunset bloom,
+   a few stars, cream text. The journal inside stays on quiet cream. */
 .center {
   min-height: 100%;
   display: flex;
@@ -57,9 +59,38 @@ body {
   text-align: center;
   padding: 32px 24px;
   gap: 14px;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 60% at 50% 110%,
+      rgba(224, 117, 127, 0.60),
+      rgba(192, 94, 138, 0.30) 42%,
+      rgba(122, 70, 149, 0.14) 66%,
+      rgba(122, 70, 149, 0) 82%),
+    linear-gradient(180deg,
+      #16133A 0%, #241E52 38%, #3D2E66 62%, #64417E 82%, #8F4E85 100%);
+  color: #FFF8EF;
 }
-.center h1 { font-size: 24px; font-weight: 600; text-wrap: balance; }
+.center h1 { font-size: 24px; font-weight: 600; text-wrap: balance; color: #FFF8EF; }
+.center .quiet { color: rgba(236, 231, 255, 0.78); }
+.center .fine a, .center .linkish { color: rgba(236, 231, 255, 0.62); }
+.center .cta {
+  color: #2B2440;
+  background: #FFF3E2;
+}
+.center .cta.ghost {
+  color: #FFF3E2;
+  background: transparent;
+  border: 1px solid rgba(255, 243, 226, 0.7);
+}
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: #FFFFFF;
+  pointer-events: none;
+}
 .spark { color: var(--accent); font-size: 22px; }
+.center .spark { color: #F5C97B; }
 .quiet { color: var(--muted); }
 .lede { max-width: 46ch; }
 .fine { font-size: 13.5px; }
@@ -99,7 +130,13 @@ body {
 }
 
 /* ---- journal ---- */
-#view-journal { height: 100%; display: flex; flex-direction: column; }
+#view-journal {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg,
+    #FBF7F1 0%, #FBF7F1 48%, #F8EFE5 74%, #F4E4D9 92%, #F1DCD1 100%);
+}
 .bar {
   display: flex;
   align-items: baseline;
