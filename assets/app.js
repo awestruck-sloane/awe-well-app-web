@@ -44,6 +44,16 @@
     return d.toLocaleDateString(undefined, opts);
   }
 
+  // ---------- analytics ----------
+  // Counts THAT something happened, never what was written (assets/
+  // analytics.js). Guarded so a blocked analytics script cannot break
+  // the journal. Web sends two events in v1: app_opened once per authed
+  // page load, entry_created after a save.
+  var openTracked = false;
+  function track(name) {
+    if (window.AweAnalytics) window.AweAnalytics.track(name);
+  }
+
   // ---------- auth ----------
   function signIn() {
     client.auth.signInWithOAuth({
@@ -64,6 +74,12 @@
 
   // ---------- gate ----------
   function checkGate() {
+    // checkGate can run more than once per load (initial session check plus
+    // auth state changes), so the flag, not the call site, enforces "once".
+    if (!openTracked) {
+      openTracked = true;
+      track('app_opened');
+    }
     loading('Checking your subscription');
     client.functions.invoke('check-entitlement', { body: {} }).then(function (res) {
       if (res.error) {
@@ -294,6 +310,7 @@
         }
         composeDirty = false;
         $('compose-body').value = '';
+        track('entry_created');
         // Written from a saved invitation -> it retires from the bank,
         // exactly as the app does.
         if (composeFrom && composeFrom.kind === 'saved') {
@@ -321,6 +338,10 @@
 
   try {
     client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Analytics borrows this client for the session JWT; it never makes
+    // its own. Guarded: a blocked analytics.js must not reach the catch
+    // below and scare anyone off sign-in.
+    if (window.AweAnalytics) window.AweAnalytics.init(client);
   } catch (e) {
     show('view-signedout');
     showSignInError(
